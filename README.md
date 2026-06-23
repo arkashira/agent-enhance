@@ -1,2 +1,4 @@
-# agent-enhance
-axentx product · A paid feature enhancement platform for the Agent-Reach repository, providing additional functionality for developers.
+# Agent Reach Pro
+A Python package that adds authentication, rate-limiting, and health-checks to your Agent-Reach bot.
+
+## Installation
