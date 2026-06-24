@@ -1,39 +1,45 @@
 import json
 from dataclasses import dataclass
-from typing import Dict
+from typing import List
 
 @dataclass
-class AuthConfig:
-    token: str
+class Integration:
+    name: str
+    config: dict
 
-class AuthMiddleware:
-    def __init__(self, config: AuthConfig):
-        self.config = config
+class AgentReachPro:
+    def __init__(self):
+        self.integrations = []
 
-    def authenticate(self, request: Dict) -> bool:
-        return request.get("token") == self.config.token
+    def add_integration(self, integration: Integration):
+        self.integrations.append(integration)
 
-class RateLimitMiddleware:
-    def __init__(self, max_requests: int):
-        self.max_requests = max_requests
-        self.requests = 0
+    def get_integrations(self):
+        return self.integrations
 
-    def allow_request(self) -> bool:
-        if self.requests < self.max_requests:
-            self.requests += 1
-            return True
-        return False
+    def configure_integration(self, name: str, config: dict):
+        for integration in self.integrations:
+            if integration.name == name:
+                integration.config = config
+                return
+        if name == "":
+            raise ValueError("Integration name cannot be empty")
+        raise ValueError(f"Integration {name} not found")
 
-class HealthCheckMiddleware:
-    def check(self) -> bool:
-        return True
+    def test_integration(self, name: str):
+        for integration in self.integrations:
+            if integration.name == name:
+                # Simulate testing the integration
+                return True
+        raise ValueError(f"Integration {name} not found")
 
-def register_middleware(config: AuthConfig, max_requests: int) -> Dict:
-    auth_middleware = AuthMiddleware(config)
-    rate_limit_middleware = RateLimitMiddleware(max_requests)
-    health_check_middleware = HealthCheckMiddleware()
-    return {
-        "auth": auth_middleware,
-        "rate_limit": rate_limit_middleware,
-        "health_check": health_check_middleware,
-    }
+    def to_json(self):
+        return json.dumps([{"name": i.name, "config": i.config} for i in self.integrations])
+
+    @staticmethod
+    def from_json(json_str: str):
+        agent_reach_pro = AgentReachPro()
+        integrations = json.loads(json_str)
+        for integration in integrations:
+            agent_reach_pro.add_integration(Integration(integration["name"], integration["config"]))
+        return agent_reach_pro
